@@ -9,19 +9,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (productId) {
       productId = productId[0];
 
-      if (blockedTabs.has(productId)) {
-        chrome.tabs.remove(tabId);
-      } else if (openTabs[productId]) {
+      // Checa se a aba está bloqueada ou se já está aberta
+      if (blockedTabs.has(productId) || openTabs[productId]) {
         chrome.tabs.remove(tabId);
       } else {
         openTabs[productId] = { id: tabId, url: changeInfo.url };
         chrome.storage.local.get({ history: [] }, data => {
           let history = data.history;
-          history.push(changeInfo.url);
+          if (!history.some(entry => entry.includes(productId))) {
+            history.push(changeInfo.url);
+          }
           chrome.storage.local.set({ history });
         });
+        chrome.storage.local.set({ openTabs });
       }
-      chrome.storage.local.set({ openTabs });
     }
   }
 });
