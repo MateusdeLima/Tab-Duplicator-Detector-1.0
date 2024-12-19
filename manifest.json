@@ -1,13 +1,12 @@
 {
-    "manifest_version": 3,
-    "name": "Tab Duplicator Detector",
-    "version": "1.0",
-    "permissions": ["tabs", "storage"],
-    "background": {
-      "service_worker": "background.js"
+  "manifest_version": 3,
+  "name": "Tab Duplicator Detector",
+  "version": "1.0",
+  "permissions": ["tabs", "storage"],
+  "background": {
+    "service_worker": "background.js"
     },
     "action": {
       "default_popup": "popup.html"
     }
-  }
-  
+}

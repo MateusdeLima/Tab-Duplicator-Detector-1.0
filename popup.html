@@ -2,16 +2,22 @@
 <html>
 <head>
   <title>Tab Duplicator Detector</title>
+  <link rel="stylesheet" href="bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="popup.css">
 </head>
 <body>
+  <nav class="navbar">
+    <a class="navbar-brand" href="#">Tab Duplicator Detector</a>
+  </nav>
   <div class="container">
-    <button id="reset" class="button">Reset Open Tabs</button>
     <div class="note">
       <h3>Open Tabs History</h3>
-      <textarea id="openTabsList" readonly></textarea>
+      <textarea id="openTabsList" class="form-control" readonly></textarea>
     </div>
+    <button id="reset" class="btn button">Reset Open Tabs</button>
   </div>
+  <script src="jquery.min.js"></script>
+  <script src="bootstrap.bundle.min.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>
