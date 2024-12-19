@@ -16,17 +16,24 @@ body {
   background-color: #000;
   padding: 10px 0;
   text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
 .navbar .navbar-brand {
   color: #fff;
-  font-size: 20px;
+  font-size: 24px; /* Tamanho maior para subtítulo */
   font-weight: bold;
 }
 
 .container {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 60px; /* Ajuste para compensar a barra de navegação fixa */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .button {
@@ -65,7 +72,8 @@ body {
 
 .note h3 {
   margin: 0;
-  text-align: left;
+  text-align: center;
+  font-size: 24px; /* Tamanho maior para subtítulo */
 }
 
 #openTabsList {
@@ -78,4 +86,5 @@ body {
   resize: none;
   background-color: rgba(255, 255, 255, 0.2);
   color: #fff;
+  margin-top: 20px; /* Maior distância do formulário */
 }
