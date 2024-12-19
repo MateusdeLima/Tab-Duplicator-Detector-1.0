@@ -14,6 +14,13 @@ document.getElementById("reset").addEventListener("click", () => {
   });
 });
 
+document.getElementById("toggleExtension").addEventListener("change", (event) => {
+  const isChecked = event.target.checked;
+  chrome.runtime.sendMessage({ action: "toggleExtension" }, response => {
+    console.log(`Extension is now ${response.status}`);
+  });
+});
+
 function displayOpenTabs() {
   chrome.runtime.sendMessage({ action: "getOpenTabs" }, response => {
     const openTabsList = document.getElementById("openTabsList");
@@ -27,4 +34,11 @@ function displayOpenTabs() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", displayOpenTabs);
+document.addEventListener("DOMContentLoaded", () => {
+  displayOpenTabs();
+
+  // Atualiza o estado do interruptor com base no estado da extensão
+  chrome.storage.local.get({ extensionEnabled: false }, data => {
+    document.getElementById("toggleExtension").checked = data.extensionEnabled;
+  });
+});

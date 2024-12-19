@@ -4,17 +4,25 @@
   <title>Tab Duplicator Detector</title>
   <link rel="stylesheet" href="bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="popup.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
   <nav class="navbar">
-    <a class="navbar-brand" href="#">Tab Duplicator Detector</a>
+    <i class="fas fa-clone"></i>
+    <span class="navbar-brand">Tab Duplicator Detector</span>
   </nav>
   <div class="container">
     <div class="note">
       <h3>Open Tabs History</h3>
       <textarea id="openTabsList" class="form-control" readonly></textarea>
     </div>
-    <button id="reset" class="btn button">Reset Open Tabs</button>
+    <div class="button-container">
+      <button id="reset" class="btn button">Reset Open Tabs</button>
+      <label class="switch">
+        <input type="checkbox" id="toggleExtension">
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
   <script src="jquery.min.js"></script>
   <script src="bootstrap.bundle.min.js"></script>

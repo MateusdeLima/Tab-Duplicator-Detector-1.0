@@ -1,7 +1,14 @@
 let openTabs = {};
 let blockedTabs = new Set();
+let extensionEnabled = false; // Variável para controlar o estado da extensão, desligada por padrão
+
+chrome.storage.local.get({ extensionEnabled: false }, data => {
+  extensionEnabled = data.extensionEnabled;
+});
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (!extensionEnabled) return; // Verifica se a extensão está habilitada
+
   if (changeInfo.url) {
     let url = new URL(changeInfo.url);
     let productId = url.pathname.match(/i\.\d+\.\d+/);
@@ -27,6 +34,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  if (!extensionEnabled) return; // Verifica se a extensão está habilitada
+
   for (let productId in openTabs) {
     if (openTabs[productId].id === tabId) {
       blockedTabs.add(productId);
@@ -52,5 +61,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ history: data.history });
     });
     return true; // keep the message channel open for sendResponse
+  } else if (request.action === "toggleExtension") {
+    extensionEnabled = !extensionEnabled; // Alterna o estado da extensão
+    chrome.storage.local.set({ extensionEnabled });
+    sendResponse({ status: extensionEnabled ? "enabled" : "disabled" });
   }
 });

@@ -20,12 +20,23 @@ body {
   top: 0;
   left: 0;
   right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .navbar .navbar-brand {
   color: #fff;
   font-size: 24px; /* Tamanho maior para subtítulo */
   font-weight: bold;
+  display: inline-block;
+  margin-left: 10px; /* Espaçamento entre a imagem e o texto */
+  text-decoration: none; /* Remover sublinhado */
+}
+
+.navbar i {
+  font-size: 24px; /* Ajuste o tamanho do ícone conforme necessário */
+  display: inline-block;
 }
 
 .container {
@@ -87,4 +98,58 @@ body {
   background-color: rgba(255, 255, 255, 0.2);
   color: #fff;
   margin-top: 20px; /* Maior distância do formulário */
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px; /* Diminuir largura */
+  height: 20px; /* Diminuir altura */
+  margin-left: 10px; /* Espaçamento entre os botões */
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px; /* Ajustar borda */
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px; /* Diminuir altura */
+  width: 14px; /* Diminuir largura */
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #FF6600;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px); /* Ajustar posição */
+}
+
+input:not(:checked) + .slider {
+  background-color: #ccc;
+}
+
+input:not(:checked) + .slider:before {
+  transform: translateX(0);
 }
