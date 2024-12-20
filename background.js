@@ -21,10 +21,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       } else if (openTabs[productId]) {
         chrome.tabs.remove(tabId);
       } else {
-        openTabs[productId] = { id: tabId, url: changeInfo.url };
-        chrome.storage.local.get({ history: [] }, data => {
+        let reducedUrl = `https://shopee.com.br/product-${productId}`;
+        openTabs[productId] = { id: tabId, url: reducedUrl };
+        chrome.storage.local.get({ history: "" }, data => {
           let history = data.history;
-          history.push(changeInfo.url);
+          history += reducedUrl + "\n";
           chrome.storage.local.set({ history });
         });
       }
@@ -49,7 +50,7 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 function resetOpenTabs() {
   openTabs = {};
   blockedTabs.clear();
-  chrome.storage.local.set({ openTabs, history: [] });
+  chrome.storage.local.set({ openTabs, history: "" });
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -58,12 +59,19 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ status: "reset" });
   } else if (request.action === "getOpenTabs") {
     chrome.storage.local.get("history", data => {
-      sendResponse({ history: data.history });
+      sendResponse({ history: data.history.split("\n") });
     });
     return true; // keep the message channel open for sendResponse
   } else if (request.action === "toggleExtension") {
     extensionEnabled = !extensionEnabled; // Alterna o estado da extensão
     chrome.storage.local.set({ extensionEnabled });
     sendResponse({ status: extensionEnabled ? "enabled" : "disabled" });
+  } else if (request.action === "showHistory") {
+    chrome.storage.local.get("history", data => {
+      let history = data.history.split("\n").join("\n");
+      alert(`Histórico de URLs:\n${history}`);
+      sendResponse({ status: "historyShown" });
+    });
+    return true; // keep the message channel open for sendResponse
   }
 });
