@@ -2,8 +2,16 @@ let openTabs = {};
 let blockedTabs = new Set();
 let extensionEnabled = false; // Variável para controlar o estado da extensão, desligada por padrão
 
-chrome.storage.local.get({ extensionEnabled: false }, data => {
+// Recupera o estado da extensão e os dados armazenados ao iniciar
+chrome.storage.local.get({ extensionEnabled: false, openTabs: {}, history: "" }, data => {
   extensionEnabled = data.extensionEnabled;
+  openTabs = data.openTabs;
+  // Converte o histórico armazenado em string para um array, se necessário
+  let storedHistory = data.history;
+  if (typeof storedHistory === "string") {
+    storedHistory = storedHistory.split("\n").filter(url => url !== "");
+  }
+  chrome.storage.local.set({ history: storedHistory.join("\n") });
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -15,18 +23,18 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
     if (productId) {
       productId = productId[0];
+      let reducedUrl = `https://shopee.com.br/product-${productId}`;
 
-      if (blockedTabs.has(productId)) {
-        chrome.tabs.remove(tabId);
-      } else if (openTabs[productId]) {
+      if (blockedTabs.has(productId) || openTabs[productId]) {
         chrome.tabs.remove(tabId);
       } else {
-        let reducedUrl = `https://shopee.com.br/product-${productId}`;
         openTabs[productId] = { id: tabId, url: reducedUrl };
         chrome.storage.local.get({ history: "" }, data => {
-          let history = data.history;
-          history += reducedUrl + "\n";
-          chrome.storage.local.set({ history });
+          let history = data.history.split("\n").filter(url => url !== "");
+          if (!history.includes(reducedUrl)) {
+            history.push(reducedUrl);
+            chrome.storage.local.set({ history: history.join("\n") });
+          }
         });
       }
       chrome.storage.local.set({ openTabs });
