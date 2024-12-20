@@ -12,47 +12,48 @@ chrome.storage.local.get({ extensionEnabled: false, openTabs: {}, history: "" },
     storedHistory = storedHistory.split("\n").filter(url => url !== "");
   }
   chrome.storage.local.set({ history: storedHistory.join("\n") });
-});
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (!extensionEnabled) return; // Verifica se a extensão está habilitada
+  // Adiciona os listeners após garantir que os dados foram recuperados
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (!extensionEnabled) return; // Verifica se a extensão está habilitada
 
-  if (changeInfo.url) {
-    let url = new URL(changeInfo.url);
-    let productId = url.pathname.match(/i\.\d+\.\d+/);
+    if (changeInfo.url) {
+      let url = new URL(changeInfo.url);
+      let productId = url.pathname.match(/i\.\d+\.\d+/);
 
-    if (productId) {
-      productId = productId[0];
-      let reducedUrl = `https://shopee.com.br/product-${productId}`;
+      if (productId) {
+        productId = productId[0];
+        let reducedUrl = `https://shopee.com.br/product-${productId}`;
 
-      if (blockedTabs.has(productId) || openTabs[productId]) {
-        chrome.tabs.remove(tabId);
-      } else {
-        openTabs[productId] = { id: tabId, url: reducedUrl };
-        chrome.storage.local.get({ history: "" }, data => {
-          let history = data.history.split("\n").filter(url => url !== "");
-          if (!history.includes(reducedUrl)) {
-            history.push(reducedUrl);
-            chrome.storage.local.set({ history: history.join("\n") });
-          }
-        });
+        if (blockedTabs.has(productId) || openTabs[productId]) {
+          chrome.tabs.remove(tabId);
+        } else {
+          openTabs[productId] = { id: tabId, url: reducedUrl };
+          chrome.storage.local.get({ history: "" }, data => {
+            let history = data.history.split("\n").filter(url => url !== "");
+            if (!history.includes(reducedUrl)) {
+              history.push(reducedUrl);
+              chrome.storage.local.set({ history: history.join("\n") });
+            }
+          });
+        }
+        chrome.storage.local.set({ openTabs });
       }
-      chrome.storage.local.set({ openTabs });
     }
-  }
-});
+  });
 
-chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-  if (!extensionEnabled) return; // Verifica se a extensão está habilitada
+  chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+    if (!extensionEnabled) return; // Verifica se a extensão está habilitada
 
-  for (let productId in openTabs) {
-    if (openTabs[productId].id === tabId) {
-      blockedTabs.add(productId);
-      delete openTabs[productId];
-      chrome.storage.local.set({ openTabs });
-      break;
+    for (let productId in openTabs) {
+      if (openTabs[productId].id === tabId) {
+        blockedTabs.add(productId);
+        delete openTabs[productId];
+        chrome.storage.local.set({ openTabs });
+        break;
+      }
     }
-  }
+  });
 });
 
 function resetOpenTabs() {
