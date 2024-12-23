@@ -36,6 +36,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         if (!history.includes(reducedUrl)) {
           history.push(reducedUrl);
           chrome.storage.local.set({ history: history.join("\n"), openTabs });
+        } else {
+          // Segunda verificação no histórico
+          performSecondCheck(history, reducedUrl, tabId);
         }
       }
     });
@@ -59,6 +62,13 @@ function resetOpenTabs() {
   openTabs = {};
   blockedTabs.clear();
   chrome.storage.local.set({ openTabs, history: "" });
+}
+
+// Função para realizar a segunda verificação no histórico
+function performSecondCheck(history, reducedUrl, tabId) {
+  if (history.includes(reducedUrl)) {
+    chrome.tabs.remove(tabId);
+  }
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
