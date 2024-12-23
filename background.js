@@ -12,48 +12,47 @@ chrome.storage.local.get({ extensionEnabled: false, openTabs: {}, history: "" },
     storedHistory = storedHistory.split("\n").filter(url => url !== "");
   }
   chrome.storage.local.set({ history: storedHistory.join("\n") });
+});
 
-  // Adiciona os listeners após garantir que os dados foram recuperados
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (!extensionEnabled) return; // Verifica se a extensão está habilitada
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (!extensionEnabled || !changeInfo.url) return; // Verifica se a extensão está habilitada e se há URL
 
-    if (changeInfo.url) {
-      let url = new URL(changeInfo.url);
-      let productId = url.pathname.match(/i\.\d+\.\d+/);
+  let url = new URL(changeInfo.url);
+  if (!url.hostname.includes('shopee.com.br')) return; // Verifica se a URL é do Shopee
 
-      if (productId) {
-        productId = productId[0];
-        let reducedUrl = `https://shopee.com.br/product-${productId}`;
+  let productId = url.pathname.match(/i\.\d+\.\d+/);
 
-        if (blockedTabs.has(productId) || openTabs[productId]) {
-          chrome.tabs.remove(tabId);
-        } else {
-          openTabs[productId] = { id: tabId, url: reducedUrl };
-          chrome.storage.local.get({ history: "" }, data => {
-            let history = data.history.split("\n").filter(url => url !== "");
-            if (!history.includes(reducedUrl)) {
-              history.push(reducedUrl);
-              chrome.storage.local.set({ history: history.join("\n") });
-            }
-          });
+  if (productId) {
+    productId = productId[0];
+    let reducedUrl = `https://shopee.com.br/product-${productId}`;
+
+    chrome.storage.local.get({ history: "" }, data => {
+      let history = data.history.split("\n").filter(url => url !== "");
+
+      if (blockedTabs.has(productId) || openTabs[productId]) {
+        chrome.tabs.remove(tabId);
+      } else {
+        openTabs[productId] = { id: tabId, url: reducedUrl };
+        if (!history.includes(reducedUrl)) {
+          history.push(reducedUrl);
+          chrome.storage.local.set({ history: history.join("\n"), openTabs });
         }
-        chrome.storage.local.set({ openTabs });
       }
-    }
-  });
+    });
+  }
+});
 
-  chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-    if (!extensionEnabled) return; // Verifica se a extensão está habilitada
+chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+  if (!extensionEnabled) return; // Verifica se a extensão está habilitada
 
-    for (let productId in openTabs) {
-      if (openTabs[productId].id === tabId) {
-        blockedTabs.add(productId);
-        delete openTabs[productId];
-        chrome.storage.local.set({ openTabs });
-        break;
-      }
+  for (let productId in openTabs) {
+    if (openTabs[productId].id === tabId) {
+      blockedTabs.add(productId);
+      delete openTabs[productId];
+      chrome.storage.local.set({ openTabs });
+      break;
     }
-  });
+  }
 });
 
 function resetOpenTabs() {
